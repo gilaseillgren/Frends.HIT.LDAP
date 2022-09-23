@@ -9,7 +9,8 @@ public class UnitTests
 
     /*
         Create a simple LDAP server to docker
-        docker build -t dwimberger/ldap-ad-it && docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it
+        docker build -t dwimberger/ldap-ad-it 
+        docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it
     */
 
     private readonly string? _host = "127.0.0.1";
