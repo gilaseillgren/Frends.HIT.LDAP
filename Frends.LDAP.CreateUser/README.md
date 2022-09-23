@@ -20,8 +20,9 @@ Rebuild the project
 Run tests
 
  Create a simple LDAP server to docker:
- `docker build -t dwimberger/ldap-ad-it && docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it`
-
+ `docker build -t dwimberger/ldap-ad-it`
+ `docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it`
+ 
 `dotnet test`
 
 
