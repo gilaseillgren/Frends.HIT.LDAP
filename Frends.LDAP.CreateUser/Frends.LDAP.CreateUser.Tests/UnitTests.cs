@@ -75,7 +75,7 @@ public class UnitTests
         DeleteUser();
     }
 
-    public void DeleteUser()
+    public void DeleteUser() 
     {
         LdapConnection ldapConn = new();
         ldapConn.Connect(_host, 389);
