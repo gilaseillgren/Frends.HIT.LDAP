@@ -6,9 +6,16 @@ namespace Frends.LDAP.CreateUser.Tests;
 [TestClass]
 public class UnitTests
 {
-    private readonly string? _host = Environment.GetEnvironmentVariable("HiQ_AzureADTest_Address");
-    private readonly string? _user = Environment.GetEnvironmentVariable("HiQ_AzureADTest_User");
-    private readonly string? _pw = Environment.GetEnvironmentVariable("HiQ_AzureADTest_Password");
+
+    /*
+        Create a simple LDAP server to docker
+        docker build -t dwimberger/ldap-ad-it && docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it
+    */
+
+    private readonly string? _host = "127.0.0.1";
+    private readonly int _port = 10389;
+    private readonly string? _user = "uid=admin,ou=system";
+    private readonly string? _pw = "secret";
 
     Input? input;
     Connection? connection;
@@ -18,12 +25,11 @@ public class UnitTests
     {
         input = new()
         {
-            Path = "CN=Users,DC=FRENDSTest01,DC=net",
-            CommonName = "MattiMeikalainen_"+new Guid(),
-            ObjectClass = "inetOrgPerson", //This will cause an error.
-            GivenName = "Matti",
-            Surname = "Meikäläinen",
-            Email = "MattiMeikalainen@foo.bar",
+            Path = "CN=qw,DC=er,DC=ty",
+            CommonName = "FAil" + new Guid(),
+            ObjectClass = "inetOrgPerson",
+            GivenName = "Ail",
+            Surname = "F",
             SetPassword = true,
             Password = "Qwerty123!",
         };
@@ -33,16 +39,16 @@ public class UnitTests
             User = _user,
             Password = _pw,
             SecureSocketLayer = false,
-            Port = LdapConnection.DefaultPort,
+            Port = _port,
             TLS = false,
         };
 
         var result = LDAP.CreateUser(input, connection);
-        Assert.IsTrue(result.Success.Equals(false) && result.Error.Contains("Insufficient Access Rights"));
+        Assert.IsTrue(result.Success.Equals(false) && result.Error.Contains("No Such Object"));
     }
 
     [TestMethod]
-    public void Create_Test()
+    public void CreateUser_Test()
     {
         var attributes = new List<Attributes> {
             new Attributes() { Key = "telephoneNumber", Value = "+123123123"},
@@ -50,15 +56,13 @@ public class UnitTests
 
         input = new()
         {
-            Path = "CN=Users,DC=FRENDSTest01,DC=net",
-            CommonName = "MattiMeikalainen",
-            ObjectClass = "user",
-            GivenName = "Matti",
-            Surname = "Meikäläinen",
-            Email = "MattiMeikalainen@foo.bar",
+            Path = "ou=users,dc=wimpi,dc=net",
+            CommonName = "Test User",
+            ObjectClass = "inetOrgPerson",
+            GivenName = "Test",
+            Surname = "User",
             SetPassword = true,
             Password = "Qwerty123!",
-            Attributes = attributes.ToArray()
         };
         connection = new()
         {
@@ -66,20 +70,20 @@ public class UnitTests
             User = _user,
             Password = _pw,
             SecureSocketLayer = false,
-            Port = LdapConnection.DefaultPort,
+            Port = _port,
             TLS = false,
         };
 
         var result = LDAP.CreateUser(input, connection);
         Assert.IsTrue(result.Success.Equals(true));
-        DeleteUser();
+        DeleteUser(input.CommonName, input.Path);
     }
 
-    public void DeleteUser() 
+    public void DeleteUser(string cn, string path) 
     {
         LdapConnection ldapConn = new();
-        ldapConn.Connect(_host, 389);
+        ldapConn.Connect(_host, _port);
         ldapConn.Bind(_user, _pw);
-        ldapConn.Delete("CN=MattiMeikalainen;CN=Users,DC=FRENDSTest01,DC=net");
+        ldapConn.Delete($"CN={cn},{path}");
     }
 }
