@@ -9,7 +9,7 @@ public class UnitTests
 
     /*
         Create a simple LDAP server to docker
-        docker pull dwimberger/ldap-ad-it && docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it
+        docker run -it --rm -p 10389:10389 dwimberger/ldap-ad-it
     */
 
     private readonly string? _host = "127.0.0.1";
@@ -50,10 +50,6 @@ public class UnitTests
     [TestMethod]
     public void CreateUser_Test()
     {
-        var attributes = new List<Attributes> {
-            new Attributes() { Key = "telephoneNumber", Value = "+123123123"},
-        };
-
         input = new()
         {
             Path = "ou=users,dc=wimpi,dc=net",
