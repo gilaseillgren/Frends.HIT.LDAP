@@ -1,0 +1,7 @@
+{
+  "Tasks": [
+    {
+      "TaskMethod": "Frends.LDAP.SearchObjects.LDAP.SearchObjects"
+    }
+  ]
+}
