@@ -21,6 +21,9 @@ public enum Scopes
     ScopeSub
 }
 
+/// <summary>
+/// Search dereferences
+/// </summary>
 public enum SearchDereference
 {
     /// <summary>

@@ -12,12 +12,12 @@ namespace Frends.LDAP.SearchObjects;
 public class LDAP
 {
     /// <summary>
-    /// Search from Active Directory.
+    /// Search objects from Active Directory.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.LDAP.SearchObjects)
     /// </summary>
     /// <param name="input">Input parameters.</param>
     /// <param name="connection">Connection parameters.</param>
-    /// <returns>Object { bool Success, string Error, string CommonName, bool PasswordSet, string Path }</returns>
+    /// <returns>Object { bool Success, string Error, string CommonName, List&lt;SearchResult&gt; SearchResult }</returns>
     public static Result SearchObjects([PropertyTab] Input input, [PropertyTab] Connection connection)
     {
         if (string.IsNullOrWhiteSpace(connection.Host) || string.IsNullOrWhiteSpace(connection.User) || string.IsNullOrWhiteSpace(connection.Password))
@@ -39,7 +39,7 @@ public class LDAP
         
         if(input.Attributes != null)
             foreach (var i in input.Attributes)
-                atr.Add(i.ToString());
+                atr.Add(i.Key.ToString());
 
         try
         {
@@ -50,7 +50,8 @@ public class LDAP
 
             LdapSearchQueue queue = conn.Search(
                 input.SearchBase, SetScope(input), 
-                input.Filter, atr.Count > 0 ? atr.ToArray() : null, 
+                input.Filter,
+                atr.ToArray(), 
                 input.TypesOnly, 
                 null, 
                 searchConstraints);
@@ -58,21 +59,21 @@ public class LDAP
             LdapMessage message;
             while ((message = queue.GetResponse()) != null)
             {
-                if (message is LdapSearchResult)
+                if (message is LdapSearchResult ldapSearchResult)
                 {
-                    var entry = new LdapEntry();
+                    var entry = ldapSearchResult.Entry;
                     var attributeList = new List<AttributeSet>();
                     var getAttributeSet = entry.GetAttributeSet();
                     var ienum = getAttributeSet.GetEnumerator();
-                    
+
                     while (ienum.MoveNext())
                     {
                         LdapAttribute attribute = ienum.Current;
                         var attributeName = attribute.Name;
                         var attributeVal = attribute.StringValue;
-                        attributeList.Add(new AttributeSet { Key = attributeName, Value = attributeVal});
+                        attributeList.Add(new AttributeSet { Key = attributeName, Value = attributeVal });
                     }
-                    
+
                     searchResults.Add(new SearchResult() { DistinguishedName = entry.Dn, AttributeSet = attributeList });
                 }
             }

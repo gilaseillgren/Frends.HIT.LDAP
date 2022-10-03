@@ -1,5 +1,5 @@
 # Frends.LDAP.SearchObjects
-Frends LDAP search task.
+Frends LDAP search objects task.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) 
 [![Build](https://github.com/FrendsPlatform/Frends.LDAP/actions/workflows/SearchObjects_build_and_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.LDAP/actions)
