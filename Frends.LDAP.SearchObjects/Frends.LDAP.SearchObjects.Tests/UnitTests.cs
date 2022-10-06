@@ -60,7 +60,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -109,7 +109,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -158,7 +158,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -207,7 +207,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -256,7 +256,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -305,7 +305,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -354,7 +354,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true) && result.SearchResult.Count == 2);
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName is not null &&
@@ -397,7 +397,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -446,7 +446,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true) && result.SearchResult.Count == 2);
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
@@ -502,7 +502,7 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.SearchObjects(input, connection);
+        var result = LDAP.SearchObjects(input, connection, default);
         Assert.IsTrue(result.Success.Equals(true));
         Assert.IsTrue(result.SearchResult.Any(x =>
             x.DistinguishedName.Equals("CN=Tes Tuser,ou=users,dc=wimpi,dc=net") &&
