@@ -1,4 +1,6 @@
-﻿namespace Frends.LDAP.AddUserToGroups.Definitions;
+﻿using System.ComponentModel;
+
+namespace Frends.LDAP.AddUserToGroups.Definitions;
 
 /// <summary>
 /// Input parameters.
@@ -16,4 +18,11 @@ public class Input
     /// </summary>
     /// <example>cn=admin,ou=roles,dc=wimpi,dc=net</example>
     public string GroupDistinguishedName { get; set; }
+
+    /// <summary>
+    /// Handle user exists exception.
+    /// </summary>
+    /// <example>UserExistsAction.Throw</example>
+    [DefaultValue(UserExistsAction.Throw)]
+    public UserExistsAction UserExistsAction { get; set; } 
 }

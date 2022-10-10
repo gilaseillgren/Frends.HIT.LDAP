@@ -42,7 +42,10 @@ public class LDAP
         }
         catch (LdapException ex)
         {
-            return new Result(false, ex.Message, input.UserDistinguishedName, input.GroupDistinguishedName);
+            if (ex.Message.Equals("Attribute Or Value Exists") && input.UserExistsAction.Equals(UserExistsAction.Skip)) 
+                return new Result(false, ex.Message, input.UserDistinguishedName, input.GroupDistinguishedName);
+            else
+                throw new LdapException($"AddUserToGroups LDAP error: {ex}");
         }
         catch (Exception ex)
         {
