@@ -6,17 +6,6 @@ namespace Frends.LDAP.AddUserToGroups.Tests;
 [TestClass]
 public class UnitTests
 {
-    // Azure AD.
-    /*
-        private readonly int _port = 389;
-        private readonly string? _path = "CN=Users,DC=FRENDSTest01,DC=net";
-        private readonly string? _dn = "CN=Tes Tuser,CN=Users,DC=FRENDSTest01,DC=net";
-        private readonly string? _groupDn = "CN=Users,CN=Builtin,DC=FRENDSTest01,DC=net";
-        private readonly string? _host = Environment.GetEnvironmentVariable("HiQ_AzureADTest_Address");
-        private readonly string? _user = Environment.GetEnvironmentVariable("HiQ_AzureADTest_User");
-        private readonly string? _pw = Environment.GetEnvironmentVariable("HiQ_AzureADTest_Password");
-    */
-
     /*
         LDAP server to docker.
         docker run -d -it --rm -p 10389:10389 dwimberger/ldap-ad-it
@@ -26,35 +15,10 @@ public class UnitTests
     private readonly string? _user = "uid=admin,ou=system";
     private readonly string? _pw = "secret";
     private readonly string _path = "ou=users,dc=wimpi,dc=net";
-    private readonly string? _dn = "CN=Tes Tuser,ou=users,dc=wimpi,dc=net";
     private readonly string? _groupDn = "cn=admin,ou=roles,dc=wimpi,dc=net";
 
     Input? input;
     Connection? connection;
-
-    [TestInitialize]
-    public void StartUp()
-    {
-        try
-        {
-            CreateTestUsers();
-        }
-        catch (Exception)
-        {
-        }
-    }
-
-    [TestCleanup]
-    public void CleanUp()
-    {
-        try
-        {
-            DeleteUser();
-        }
-        catch (Exception)
-        {
-        }
-    }
 
     [TestMethod]
     public void Update_HandleLDAPError_Test()
@@ -81,9 +45,13 @@ public class UnitTests
     [TestMethod]
     public void AddUserToGroups_Test()
     {
+        var tuser = "Tes Tuser" + Guid.NewGuid().ToString();
+        var dn = $"CN={tuser},ou=users,dc=wimpi,dc=net";
+        CreateTestUsers(tuser);
+
         input = new()
         {
-            UserDistinguishedName = _dn,
+            UserDistinguishedName = dn,
             GroupDistinguishedName = _groupDn
         };
         connection = new()
@@ -100,31 +68,27 @@ public class UnitTests
         Assert.IsTrue(result.Success.Equals(true));
     }
 
-    public void CreateTestUsers()
+    public void CreateTestUsers(string tuser)
     {
-        LdapConnection conn = new();
-        conn.Connect(_host, _port);
-        conn.Bind(_user, _pw);
+        try
+        {
+            LdapConnection conn = new();
+            conn.Connect(_host, _port);
+            conn.Bind(_user, _pw);
 
-        var attributeSet = new LdapAttributeSet();
-        attributeSet.Add(new LdapAttribute("objectclass", "user"));
-        attributeSet.Add(new LdapAttribute("cn", "Tes Tuser"));
-        attributeSet.Add(new LdapAttribute("givenname", "Tes"));
-        attributeSet.Add(new LdapAttribute("sn", "Tuser"));
+            var attributeSet = new LdapAttributeSet();
+            attributeSet.Add(new LdapAttribute("objectclass", "user"));
+            attributeSet.Add(new LdapAttribute("cn", tuser));
+            attributeSet.Add(new LdapAttribute("givenname", "Tes"));
+            attributeSet.Add(new LdapAttribute("sn", tuser.Split(' ', 1)));
 
-        var entry = $"CN=Tes Tuser,{_path}";
-        LdapEntry newEntry = new(entry, attributeSet);
-        conn.Add(newEntry);
-        conn.Disconnect();
-    }
-
-    public void DeleteUser()
-    {
-        LdapConnection conn = new();
-        conn.Connect(_host, _port);
-        conn.Bind(_user, _pw);
-        conn.Delete($"CN=Tes Tuser,{_path}");
-        conn.Delete($"CN=Tes Tuser,{_path}");
-        conn.Disconnect();
+            var entry = $"CN={tuser},{_path}";
+            LdapEntry newEntry = new(entry, attributeSet);
+            conn.Add(newEntry);
+            conn.Disconnect();
+        }
+        catch (Exception)
+        {
+        }
     }
 }
