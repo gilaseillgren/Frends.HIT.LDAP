@@ -45,7 +45,7 @@ public class LDAP
             if (ex.Message.Equals("Attribute Or Value Exists") && input.UserExistsAction.Equals(UserExistsAction.Skip)) 
                 return new Result(false, ex.Message, input.UserDistinguishedName, input.GroupDistinguishedName);
             else
-                throw new LdapException($"AddUserToGroups LDAP error: {ex}");
+                throw new Exception($"AddUserToGroups LDAP error: {ex.Message}");
         }
         catch (Exception ex)
         {

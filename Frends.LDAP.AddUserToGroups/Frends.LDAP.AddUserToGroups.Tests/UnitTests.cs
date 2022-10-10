@@ -26,7 +26,8 @@ public class UnitTests
         input = new()
         {
             UserDistinguishedName = "CN=Common Name,CN=Users,DC=Example,DC=Com",
-            GroupDistinguishedName = "CN=Admins,DC=Example,DC=Com"
+            GroupDistinguishedName = "CN=Admins,DC=Example,DC=Com",
+            UserExistsAction = UserExistsAction.Throw
         };
         connection = new()
         {
@@ -38,8 +39,8 @@ public class UnitTests
             TLS = false,
         };
 
-        var result = LDAP.AddUserToGroups(input, connection);
-        Assert.IsTrue(result.Success.Equals(false) && result.Error.Contains("No Such Object"));
+        var ex = Assert.ThrowsException<Exception>(() => LDAP.AddUserToGroups(input, connection));
+        Assert.IsTrue(ex.Message.Contains("No Such Object"));
     }
 
     [TestMethod]
