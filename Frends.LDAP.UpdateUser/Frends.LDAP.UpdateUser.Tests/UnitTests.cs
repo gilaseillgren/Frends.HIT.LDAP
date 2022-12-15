@@ -37,6 +37,7 @@ public class UnitTests
             Path = "CN=qw,DC=er,DC=ty",
             CommonName = "FAil" + new Guid(),
             ModificationMethod = ModificationMethod.Add,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "senior coffee maker" } }
         };
         connection = new()
@@ -54,6 +55,33 @@ public class UnitTests
     }
 
     [TestMethod]
+    public void UpdateUser_Add_New_CreateDNFalse_Test()
+    {
+        CreateTestUsers(false);
+
+        input = new()
+        {
+            DistinguishedName = "CN=Tes TUser,ou=users,dc=wimpi,dc=net",
+            ModificationMethod = ModificationMethod.Add,
+            CreateDN = false,
+            Attributes = new[] { new Attributes { Key = "title", Value = "senior coffee maker" } }
+
+        };
+        connection = new()
+        {
+            Host = _host,
+            User = _user,
+            Password = _pw,
+            SecureSocketLayer = false,
+            Port = _port,
+            TLS = false,
+        };
+
+        var result = LDAP.UpdateUser(input, connection);
+        Assert.IsTrue(result.Success.Equals(true));
+    }
+
+    [TestMethod]
     public void UpdateUser_Add_New_Test()
     {
         CreateTestUsers(false);
@@ -63,6 +91,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Add,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "senior coffee maker" } }
 
         };
@@ -90,6 +119,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Add,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "senior coffee maker" } }
         };
         connection = new()
@@ -116,6 +146,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Delete,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "coffee maker" } }
 
         };
@@ -143,6 +174,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Delete,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "coffee maker" } }
 
         };
@@ -170,6 +202,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Add,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "" } }
         };
         connection = new()
@@ -196,6 +229,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Replace,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "senior coffee maker" } }
 
         };
@@ -224,6 +258,7 @@ public class UnitTests
             Path = "ou=users,dc=wimpi,dc=net",
             CommonName = "Tes TUser",
             ModificationMethod = ModificationMethod.Replace,
+            CreateDN = true,
             Attributes = new[] { new Attributes { Key = "title", Value = "" } }
         };
         connection = new()
@@ -246,11 +281,13 @@ public class UnitTests
         conn.Connect(_host, _port);
         conn.Bind(_user, _pw);
 
-        var attributeSet = new LdapAttributeSet();
-        attributeSet.Add(new LdapAttribute("objectclass", "inetOrgPerson"));
-        attributeSet.Add(new LdapAttribute("cn", "Tes Tuser"));
-        attributeSet.Add(new LdapAttribute("givenname", "Tes"));
-        attributeSet.Add(new LdapAttribute("sn", "Tuser"));
+        var attributeSet = new LdapAttributeSet
+        {
+            new LdapAttribute("objectclass", "inetOrgPerson"),
+            new LdapAttribute("cn", "Tes Tuser"),
+            new LdapAttribute("givenname", "Tes"),
+            new LdapAttribute("sn", "Tuser")
+        };
 
         if (setTitle)
             attributeSet.Add(new LdapAttribute("title", "coffee maker"));

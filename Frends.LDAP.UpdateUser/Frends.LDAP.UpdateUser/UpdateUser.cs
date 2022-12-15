@@ -3,6 +3,8 @@ using System.ComponentModel;
 using Novell.Directory.Ldap;
 using System;
 using System.Collections;
+using System.Reflection;
+using System.Runtime.Loader;
 
 namespace Frends.LDAP.UpdateUser;
 
@@ -11,6 +13,15 @@ namespace Frends.LDAP.UpdateUser;
 /// </summary>
 public class LDAP
 {
+    /// For mem cleanup.
+    static LDAP()
+    {
+        var currentAssembly = Assembly.GetExecutingAssembly();
+        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
+        if (currentContext != null)
+            currentContext.Unloading += OnPluginUnloadingRequested;
+    }
+
     /// <summary>
     /// Update Active Directory user.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.LDAP.UpdateUser)
@@ -30,7 +41,7 @@ public class LDAP
         try
         {
             var defaultPort = connection.SecureSocketLayer ? 636 : 389;
-            var entry = $"CN={input.CommonName},{input.Path}";
+            var entry = input.CreateDN ? $"CN={input.CommonName},{input.Path}" : input.DistinguishedName;
 
             conn.SecureSocketLayer = connection.SecureSocketLayer;
             conn.Connect(connection.Host, connection.Port == 0 ? defaultPort : connection.Port);
@@ -76,5 +87,10 @@ public class LDAP
             if (connection.TLS) conn.StopTls();
             conn.Disconnect();
         }
+    }
+
+    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
+    {
+        obj.Unloading -= OnPluginUnloadingRequested;
     }
 }
