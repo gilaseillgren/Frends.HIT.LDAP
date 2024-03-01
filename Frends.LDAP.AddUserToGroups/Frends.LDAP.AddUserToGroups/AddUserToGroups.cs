@@ -91,7 +91,7 @@ public class LDAP
             {
                 LdapAttribute memberAttr = entry.GetAttribute("member");
                 var currentMembers = memberAttr.StringValueArray;
-                foreach (var member in currentMembers.Where(e => e == userDn))
+                if (currentMembers.Where(e => e == userDn).Any())
                     return true;
             }
         }

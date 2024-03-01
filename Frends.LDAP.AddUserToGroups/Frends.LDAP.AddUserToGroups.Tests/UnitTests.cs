@@ -148,11 +148,8 @@ public class UnitTests
 
         LdapAttribute memberAttr = groupEntry.GetAttribute("member");
         var currentMembers = memberAttr.StringValueArray;
-        foreach (var member in currentMembers)
-        {
-            if (member == userDn)
-                remove = true;
-        }
+        if (currentMembers.Where(e => e == userDn).Any())
+            remove = true;
 
         if (remove)
         {
