@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Novell.Directory.Ldap;
 using System;
 using System.Threading;
+using System.Linq;
 
 namespace Frends.LDAP.AddUserToGroups;
 
@@ -24,7 +25,7 @@ public class LDAP
         if (string.IsNullOrWhiteSpace(connection.Host) || string.IsNullOrWhiteSpace(connection.User) || string.IsNullOrWhiteSpace(connection.Password))
             throw new Exception("AddUserToGroups error: Connection parameters missing.");
 
-        LdapConnection conn = new();
+        using LdapConnection conn = new();
 
         try
         {
@@ -65,7 +66,7 @@ public class LDAP
     private static bool UserExistsInGroup(LdapConnection connection, string userDn, string groupDn, CancellationToken cancellationToken)
     {
         // Search for the user's groups
-        var searchResults = (LdapSearchResults)connection.Search(
+        ILdapSearchResults searchResults = connection.Search(
             groupDn,
             LdapConnection.ScopeSub,
             "(objectClass=*)",
@@ -90,11 +91,8 @@ public class LDAP
             {
                 LdapAttribute memberAttr = entry.GetAttribute("member");
                 var currentMembers = memberAttr.StringValueArray;
-                foreach (var member in currentMembers)
-                {
-                    if (member == userDn)
-                        return true;
-                }
+                foreach (var member in currentMembers.Where(e => e == userDn))
+                    return true;
             }
         }
 

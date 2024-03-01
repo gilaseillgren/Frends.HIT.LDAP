@@ -16,7 +16,7 @@ public class UnitTests
     private readonly string? _user = "uid=admin,ou=system";
     private readonly string? _pw = "secret";
     private readonly string? _groupDn = "cn=admin,ou=roles,dc=wimpi,dc=net";
-    private string _testUserDn = "CN=Test User,ou=users,dc=wimpi,dc=net";
+    private readonly string _testUserDn = "CN=Test User,ou=users,dc=wimpi,dc=net";
 
     private Input? input;
     private Connection? connection;
@@ -109,7 +109,7 @@ public class UnitTests
 
     private void CreateTestUser(string userDn)
     {
-        LdapConnection conn = new()
+        using LdapConnection conn = new()
         {
             SecureSocketLayer = false,
         };
@@ -131,11 +131,11 @@ public class UnitTests
 
     private void DeleteTestUsers(string userDn, string groupDn)
     {
-        LdapConnection conn = new();
+        using LdapConnection conn = new();
         conn.Connect(_host, _port);
         conn.Bind(_user, _pw);
 
-        var searchResults = (LdapSearchResults)conn.Search(
+        ILdapSearchResults searchResults = conn.Search(
                 groupDn,
                 LdapConnection.ScopeSub,
                 "(objectClass=*)",
