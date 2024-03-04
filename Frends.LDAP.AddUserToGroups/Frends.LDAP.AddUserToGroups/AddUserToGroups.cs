@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using Novell.Directory.Ldap;
 using System;
+using System.Threading;
+using System.Linq;
 
 namespace Frends.LDAP.AddUserToGroups;
 
@@ -16,13 +18,14 @@ public class LDAP
     /// </summary>
     /// <param name="input">Input parameters.</param>
     /// <param name="connection">Connection parameters.</param>
-    /// <returns>Object { bool Success, string Error, string CommonName, string Path }</returns>
-    public static Result AddUserToGroups([PropertyTab] Input input, [PropertyTab] Connection connection)
+    /// <param name="cancellationToken">Cancellation token given by Frends.</param>
+    /// <returns>Object { bool Success, string Error, string UserDistinguishedName, string GroupDistinguishedName }</returns>
+    public static Result AddUserToGroups([PropertyTab] Input input, [PropertyTab] Connection connection, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(connection.Host) || string.IsNullOrWhiteSpace(connection.User) || string.IsNullOrWhiteSpace(connection.Password))
             throw new Exception("AddUserToGroups error: Connection parameters missing.");
 
-        LdapConnection conn = new();
+        using LdapConnection conn = new();
 
         try
         {
@@ -30,22 +33,24 @@ public class LDAP
 
             conn.SecureSocketLayer = connection.SecureSocketLayer;
             conn.Connect(connection.Host, connection.Port == 0 ? defaultPort : connection.Port);
-            if (connection.TLS) conn.StartTls();
+            if (connection.TLS)
+                conn.StartTls();
             conn.Bind(connection.User, connection.Password);
 
-			LdapModification[] mods = new LdapModification[1];
-			var member = new LdapAttribute("member", input.UserDistinguishedName);
-			mods[0] = new LdapModification(LdapModification.Add, member);
-			conn.Modify(input.GroupDistinguishedName, mods);
+            LdapModification[] mods = new LdapModification[1];
+            var member = new LdapAttribute("member", input.UserDistinguishedName);
+            mods[0] = new LdapModification(LdapModification.Add, member);
 
-			return new Result(true, null, input.UserDistinguishedName, input.GroupDistinguishedName);
+            if (UserExistsInGroup(conn, input.UserDistinguishedName, input.GroupDistinguishedName, cancellationToken) && input.UserExistsAction.Equals(UserExistsAction.Skip))
+                return new Result(false, "AddUserToGroups LDAP error: User already exists in the group.", input.UserDistinguishedName, input.GroupDistinguishedName);
+
+            conn.Modify(input.GroupDistinguishedName, mods);
+
+            return new Result(true, null, input.UserDistinguishedName, input.GroupDistinguishedName);
         }
         catch (LdapException ex)
         {
-            if (ex.Message.Equals("Attribute Or Value Exists") && input.UserExistsAction.Equals(UserExistsAction.Skip)) 
-                return new Result(false, ex.Message, input.UserDistinguishedName, input.GroupDistinguishedName);
-            else
-                throw new Exception($"AddUserToGroups LDAP error: {ex.Message}");
+            throw new Exception($"AddUserToGroups LDAP error: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -56,5 +61,41 @@ public class LDAP
             if (connection.TLS) conn.StopTls();
             conn.Disconnect();
         }
+    }
+
+    private static bool UserExistsInGroup(LdapConnection connection, string userDn, string groupDn, CancellationToken cancellationToken)
+    {
+        // Search for the user's groups
+        ILdapSearchResults searchResults = connection.Search(
+            groupDn,
+            LdapConnection.ScopeSub,
+            "(objectClass=*)",
+            null,
+            false);
+
+        // Check if the user is a member of the specified group
+        while (searchResults.HasMore())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            LdapEntry entry;
+            try
+            {
+                entry = searchResults.Next();
+            }
+            catch (LdapException)
+            {
+                continue;
+            }
+
+            if (entry != null)
+            {
+                LdapAttribute memberAttr = entry.GetAttribute("member");
+                var currentMembers = memberAttr.StringValueArray;
+                if (currentMembers.Where(e => e == userDn).Any())
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

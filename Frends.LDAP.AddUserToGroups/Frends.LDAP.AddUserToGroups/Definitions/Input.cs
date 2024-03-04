@@ -24,5 +24,5 @@ public class Input
     /// </summary>
     /// <example>UserExistsAction.Throw</example>
     [DefaultValue(UserExistsAction.Throw)]
-    public UserExistsAction UserExistsAction { get; set; } 
+    public UserExistsAction UserExistsAction { get; set; }
 }
